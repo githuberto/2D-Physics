@@ -15,8 +15,15 @@ public class Circle extends Sprite{
 		color = c;
 		restitution = 0.5;
 	}
-
-	@Override
+	
+	/*** Accessors ***/
+	
+	public double r(){
+		return radius;
+	}
+	
+	/*** Simulation ***/
+	
 	public void draw(Graphics g) {
 		Color temp = g.getColor();
 		g.setColor(color);
@@ -25,14 +32,22 @@ public class Circle extends Sprite{
 		g.setColor(temp);
 	}
 	
+//	public boolean inBounds(double w, double h){
+//		double x = pos.x();
+//		double y = pos.y();
+//		
+//		return x - radius < w
+//				&& x + radius > 0
+//				&& y - radius < h
+//				&& y + radius > 0;
+//	}
+	
+	/*** Utilities ***/
+		
 	public void drawVecText(Graphics g){
 		g.setColor(Color.BLACK);
 		g.setFont(new Font(g.getFont().getFontName(), Font.BOLD, 12));
 		g.drawString("V: " + vel, d2I(pos.x() - radius/2), d2I(pos.y()));
-	}
-	
-	public double r(){
-		return radius;
 	}
 	
 	public String toString(){

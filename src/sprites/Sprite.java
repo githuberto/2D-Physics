@@ -73,6 +73,14 @@ public abstract class Sprite implements Observer {
 	
 	/*** Utilities ***/
 	
+	public boolean inBounds(double width, double height){
+//		double x = pos.x();
+//		double y = pos.y();
+//		
+//		return y < height && y > 0 && x < width && x > 0;
+		return true;
+	}
+	
 	public static int d2I(double d){
 		return (int)(0.5 + d);
 	}
@@ -93,5 +101,9 @@ public abstract class Sprite implements Observer {
 		if(c.equals(Color.MAGENTA))
 			return "magenta";
 		return "" + c;
+	}
+	
+	static boolean checkPoint(double width, double height, Vec v){
+		return (0 < v.y() && v.y() < height && 0 < v.x() && v.x() < width);
 	}
 }

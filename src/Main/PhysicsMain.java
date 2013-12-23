@@ -5,8 +5,8 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-
 import javax.swing.Timer;
+
 
 import physics.Vec;
 import sprites.*;
@@ -20,17 +20,21 @@ public class PhysicsMain {
 	 * TIME_SCALE - the speed of the simulation (1 being normal speed)
 	 * PIXEL_SCALE - the size of a pixel in the simulation
 	 **/
+	
 	public static final int WIDTH = 1000;
 	public static final int HEIGHT = 600;
-	public static final double TIME_STEP = 0.001; // in seconds
+	public static final double TIME_STEP = 0.01; // in seconds
 	public static final double TIME_SCALE = 1;
 	public static final double GRAVITY = 9.81;
-	public static final double PIXEL_SCALE = 0.1; // in meters
+	public static final double PIXEL_SCALE = 0.01; // in meters
 	public static ArrayList<Sprite> sprites;
 	public static ArrayList<Sprite> spriteQueue = new ArrayList<Sprite>();
 	public static Dispatcher disp;
 	public static PhysicsWindow frame;
 	public static final PhysicsWindow[] FRAME_REF = new PhysicsWindow[1]; // holds frame reference for anonymous classes
+	
+	public static long last = System.currentTimeMillis();
+	
 	
 	/*** Initialization ***/
 	
@@ -51,7 +55,7 @@ public class PhysicsMain {
 		
 		// make timer
 		Timer drawTimer = makeTimer(TIME_STEP, TIME_SCALE);
-		
+		System.out.println(drawTimer.getDelay());
 		// start simualtion
 		drawTimer.start();
 	}
@@ -65,7 +69,7 @@ public class PhysicsMain {
 	}
 	
 	public static void makeBoxes(ArrayList<Sprite> sprites){
-		sprites.add(new Box(WIDTH / 2, (HEIGHT), WIDTH, 100, Color.BLACK));
+		sprites.add(new Box(WIDTH / 2, HEIGHT - 1, WIDTH, 100, Color.BLACK));
 		sprites.get(0).setMass(0);
 //		sprites.add(new Box(100, 100, 120, 120, Color.RED));
 //		sprites.add(new Box(230, 100, 100, 100, Color.BLUE));
@@ -81,16 +85,26 @@ public class PhysicsMain {
 		return newFrame;
 	}
 	
-	public static Timer makeTimer(double t, double tScale){
+	public static javax.swing.Timer makeTimer(double t, double tScale){
 		int timeSlice = (int)(t * 1000);
 		ActionListener refreshGraphics = new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
-				FRAME_REF[0].panel().repaint();
+//				countTicks();
+				callRepaint();
 				addSprites();
 				doPhysics();
 			}
 		};
-		return new Timer(timeSlice, refreshGraphics);
+		return new javax.swing.Timer(timeSlice, refreshGraphics);
+	}
+	
+	public static void callRepaint(){
+		frame.panel().repaint();
+	}
+	
+	public static void countTicks(){
+		System.out.println(System.currentTimeMillis() - last);
+		last = System.currentTimeMillis();
 	}
 	
 	/*** Simulation ***/
@@ -100,13 +114,13 @@ public class PhysicsMain {
 		int size = sprites.size();
 		for(int i = size - 1; i >= 0; i--){
 			Sprite a = sprites.get(i);
-			if(inBounds(a.pos())){
+			if(inBounds(a)){
 				applyGravity(a);
-				a.move(TIME_SCALE * TIME_STEP, PIXEL_SCALE);
-//				for(int j = i - 1; j >= 0; j--){
-//					Sprite b = sprites.get(j);
-//					//collision code here
-//				}
+				a.move(TIME_STEP, PIXEL_SCALE);
+				for(int j = i - 1; j >= 0; j--){
+					Sprite b = sprites.get(j);
+					//collision code here
+				}
 			}
 			else{
 				disp.deleteObserver(a);
@@ -120,7 +134,7 @@ public class PhysicsMain {
 	private static void applyGravity(Sprite s){
 		if(s.invMass() > 0){
 			Vec v = s.vel();
-			v.add(0, GRAVITY * TIME_STEP);
+			v.add(0, GRAVITY * TIME_STEP * TIME_SCALE);
 		}
 	}
 
@@ -205,13 +219,8 @@ public class PhysicsMain {
 	/*** Utilities ***/
 	
 	// check if the vector is inside the window
-	private static boolean inBounds(Vec v){
-		if(v.x() < 0 ||
-				v.x() > WIDTH ||
-				v.y() < 0 ||
-				v.y() > HEIGHT)
-			return false;
-		return true;
+	private static boolean inBounds(Sprite s){
+		return s.inBounds(WIDTH, HEIGHT);
 	}
 	
 	public static void makeBox(double x0, double y0){
