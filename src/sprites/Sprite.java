@@ -74,11 +74,11 @@ public abstract class Sprite implements Observer {
 	/*** Utilities ***/
 	
 	public boolean inBounds(double width, double height){
-//		double x = pos.x();
-//		double y = pos.y();
-//		
-//		return y < height && y > 0 && x < width && x > 0;
-		return true;
+		double x = pos.x();
+		double y = pos.y();
+		
+		return y < height && y > 0 && x < width && x > 0;
+//		return true;
 	}
 	
 	public static int d2I(double d){

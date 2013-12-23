@@ -89,7 +89,7 @@ public class PhysicsMain {
 		int timeSlice = (int)(t * 1000);
 		ActionListener refreshGraphics = new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
-//				countTicks();
+				countTicks();
 				callRepaint();
 				addSprites();
 				doPhysics();

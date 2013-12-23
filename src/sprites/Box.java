@@ -65,17 +65,17 @@ public class Box extends Sprite{
 		g.drawString("V: " + vel, d2I(pos.x() - width/4), d2I(pos.y()));
 	}
 	
-//	public boolean inBounds(double w, double h){
-//		double x = pos.x();
-//		double y = pos.y();
-//		double hW = width / 2;
-//		double hH = height / 2;
-//		
-//		return x - hW < width
-//				&& x + hW > 0
-//				&& y - hH < height
-//				&& y + hH > 0;
-//	}
+	public boolean inBounds(double w, double h){
+		double x = pos.x();
+		double y = pos.y();
+		double hW = width / 2;
+		double hH = height / 2;
+		
+		return x - hW < w
+				&& x + hW > 0
+				&& y - hH < h
+				&& y + hH > 0;
+	}
 	
 	/*** Utilities ***/
 	

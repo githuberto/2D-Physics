@@ -32,15 +32,15 @@ public class Circle extends Sprite{
 		g.setColor(temp);
 	}
 	
-//	public boolean inBounds(double w, double h){
-//		double x = pos.x();
-//		double y = pos.y();
-//		
-//		return x - radius < w
-//				&& x + radius > 0
-//				&& y - radius < h
-//				&& y + radius > 0;
-//	}
+	public boolean inBounds(double w, double h){
+		double x = pos.x();
+		double y = pos.y();
+		
+		return x - radius < w
+				&& x + radius > 0
+				&& y - radius < h
+				&& y + radius > 0;
+	}
 	
 	/*** Utilities ***/
 		
