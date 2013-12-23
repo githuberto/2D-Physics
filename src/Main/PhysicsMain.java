@@ -2,14 +2,11 @@ package Main;
 import graphics.*;
 
 import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import physics.Vec;
@@ -20,9 +17,9 @@ public class PhysicsMain {
 	/*** Physics Constants***/
 	/**
 	 * all calculations will be made in SI units (e.g. velocity in meters per second)
-	 * TIME_STEP controls the number of calculations per second
-	 * TIME_SCALE controls the speed of the simulation (1 being real life)
-	 * PIXEL_SCALE controls the size of a pixel in the simulation
+	 * TIME_STEP - the number of calculations per second
+	 * TIME_SCALE - the speed of the simulation (1 being normal speed)
+	 * PIXEL_SCALE - the size of a pixel in the simulation
 	 **/
 	public static final int WIDTH = 1000;
 	public static final int HEIGHT = 600;
@@ -118,7 +115,7 @@ public class PhysicsMain {
 //							resolveCollision(a, b, n);
 //						}
 //					}
-					a.move(TIME_SCALE * TIME_STEP);
+					a.move(TIME_SCALE * TIME_STEP, PIXEL_SCALE);
 				}
 			}
 	}
