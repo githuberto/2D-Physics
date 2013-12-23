@@ -25,12 +25,12 @@ public class PhysicsMain {
 	public static final double TIME_STEP = 0.001; // in seconds
 	public static final double TIME_SCALE = 1;
 	public static final double GRAVITY = 9.81;
-	public static final double PIXEL_SCALE = 0.01; // in meters
-	// holds the reference to the physics window for anonymous classes
-	public static final PhysicsWindow[] FRAME_REF = new PhysicsWindow[1];
+	public static final double PIXEL_SCALE = 0.1; // in meters
 	public static ArrayList<Sprite> sprites;
+	public static ArrayList<Sprite> spriteQueue = new ArrayList<Sprite>();
 	public static Dispatcher disp;
 	public static PhysicsWindow frame;
+	public static final PhysicsWindow[] FRAME_REF = new PhysicsWindow[1]; // holds frame reference for anonymous classes
 	
 	/*** Initialization ***/
 	
@@ -86,6 +86,7 @@ public class PhysicsMain {
 		ActionListener refreshGraphics = new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
 				FRAME_REF[0].panel().repaint();
+				addSprites();
 				doPhysics();
 			}
 		};
@@ -96,44 +97,23 @@ public class PhysicsMain {
 	
 	// run the simulation
 	public static void doPhysics(){
-		for(int i = sprites.size() - 1; i >= 0; i--){
-			Sprite a = sprites.get(sprites.size() - 1);
+		int size = sprites.size();
+		for(int i = size - 1; i >= 0; i--){
+			Sprite a = sprites.get(i);
 			if(inBounds(a.pos())){
 				applyGravity(a);
-				for(int j = i - 1; j >= 0; j--){
-					Sprite b = sprites.get(j);
-					//collision code here
-				}
 				a.move(TIME_SCALE * TIME_STEP, PIXEL_SCALE);
+//				for(int j = i - 1; j >= 0; j--){
+//					Sprite b = sprites.get(j);
+//					//collision code here
+//				}
 			}
 			else{
 				disp.deleteObserver(a);
+				sprites.remove(i);
 				System.out.println("ded");
-				
 			}
 		}
-//			Iterator<Sprite> iter = sprites.iterator();
-//			while(iter.hasNext()){
-//				Sprite a = iter.next();
-//				if(!inBounds(a.pos())){
-//					disp.deleteObserver(a);
-//					iter.remove();
-//					System.out.println("ded");
-//				}
-//				else{
-//					doGravity(a);
-//					Iterator<Sprite> jter = sprites.iterator();
-//					while(jter.hasNext()){
-//						Sprite b = jter.next();
-//						Vec n = null;
-//						if(objectsCollided(a, b, n)){
-//							resolveCollision(a, b, n);
-//						}
-//					}
-//					a.move(TIME_SCALE * TIME_STEP, PIXEL_SCALE);
-//				}
-//			}
-		
 	}
 	
 	// apply gravity
@@ -235,20 +215,17 @@ public class PhysicsMain {
 	}
 	
 	public static void makeBox(double x0, double y0){
-		sprites.add(new Box(x0, y0, 100, 100, Color.RED));
-		disp.addObserver(sprites.get(sprites.size() - 1));
+		spriteQueue.add(new Box(x0, y0, 100, 100, Color.RED));
 	}
 	public static void makeCircle(double x0, double y0){
-		sprites.add(new Circle(x0, y0, 50, Color.BLUE));
-		disp.addObserver(sprites.get(sprites.size() - 1));
+		spriteQueue.add(new Circle(x0, y0, 50, Color.BLUE));
+	}
+	public static void addSprites(){
+		sprites.addAll(spriteQueue);
+		for(Sprite s : spriteQueue){
+			disp.addObserver(s);
+		}
+		spriteQueue.clear();
 	}
 	
-	private static int penetrationDepthCircleVSBox(Circle c, Vec max, Vec min){
-		double x = c.x();
-		double y = c.y();
-		if(min.x() < x && x < max.x() && min.y() < y && y < max.y()){
-			
-		}
-		return 0;
-	}
 }
