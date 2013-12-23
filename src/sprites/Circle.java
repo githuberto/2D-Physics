@@ -15,11 +15,6 @@ public class Circle extends Sprite{
 		color = c;
 		restitution = 0.5;
 	}
-	
-	@Override
-	public void move(double t) {
-		pos.add(vel.times(t));
-	}
 
 	@Override
 	public void draw(Graphics g) {

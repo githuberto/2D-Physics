@@ -1,13 +1,18 @@
 package sprites;
 
+import graphics.PhysicsWindow;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Observable;
 import java.util.Observer;
 
+import Main.PhysicsMain;
 import physics.Vec;
 
 public abstract class Sprite implements Observer {
+	public static final double P_SCALE = PhysicsMain.PIXEL_SCALE;
+	
 	Vec pos;
 	Vec vel = new Vec(0,0);
 	double invMass = 0.01;
@@ -17,7 +22,9 @@ public abstract class Sprite implements Observer {
 	/*** Simulation ***/
 	
 	// move the sprite using velocity given timestep
-	public abstract void move(double t);
+	public void move(double t){
+		pos.add(vel.times(t * P_SCALE));
+	}
 	
 	// respond to a call from the observer
 	public void update(Observable o, Object g){
@@ -58,7 +65,7 @@ public abstract class Sprite implements Observer {
 	}
 	
 	public void setVel(double x0, double y0){
-		vel.set(x0, y0);
+		vel.set(x0 * P_SCALE, y0 * P_SCALE);
 	}
 	
 	public void setMass(double m){

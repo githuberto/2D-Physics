@@ -3,7 +3,6 @@ package sprites;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.util.Observable;
 
 import physics.Vec;
 
@@ -51,10 +50,6 @@ public class Box extends Sprite{
 	}
 	
 	/*** Simulation ***/
-	
-	public void move(double t){
-		pos.add(vel.times(t));
-	}
 	
 	public void draw(Graphics g){
 		Color temp = g.getColor();

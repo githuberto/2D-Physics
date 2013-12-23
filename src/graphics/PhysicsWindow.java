@@ -4,11 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import sprites.Sprite;
@@ -31,9 +34,10 @@ public class PhysicsWindow extends JFrame {
 		width = 450;
 		initGUI();
 	}
-	public PhysicsWindow(int w, int h) {
+	public PhysicsWindow(int w, int h, Dispatcher d) {
 		width = w;
 		height = h;
+		disp = d;
 		initGUI();
 	}
 	
@@ -46,24 +50,9 @@ public class PhysicsWindow extends JFrame {
 		setResizable(false);
 		setBounds(100, 100, 100 + width, 100 + height);
 		setSize(width, height);
-		contentPane = new JPanel(){
-			private static final long serialVersionUID = -610118688239268988L;
-			
-			// override paint component to draw sprites
-			public void paintComponent(Graphics g){
-				super.paintComponent(g);
-				disp.notifyAll(g);
-			}
-		};
-		contentPane.setBackground(Color.WHITE);
-		contentPane.setForeground(Color.WHITE);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
+		contentPane = new ContentPane(disp);
 		setContentPane(contentPane);
-		System.out.println(contentPane.getHeight());
 	}
-	
-
 	
 	/*** Accessors ***/
 	
