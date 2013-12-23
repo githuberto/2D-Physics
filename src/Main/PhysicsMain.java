@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import javax.swing.Timer;
 
@@ -97,17 +96,33 @@ public class PhysicsMain {
 	
 	// run the simulation
 	public static void doPhysics(){
-			Iterator<Sprite> iter = sprites.iterator();
-			while(iter.hasNext()){
-				Sprite a = iter.next();
-				if(!inBounds(a.pos())){
-					disp.deleteObserver(a);
-					iter.remove();
-					System.out.println("ded");
+		for(int i = sprites.size() - 1; i >= 0; i--){
+			Sprite a = sprites.get(sprites.size() - 1);
+			if(inBounds(a.pos())){
+				applyGravity(a);
+				for(int j = i - 1; j >= 0; j--){
+					Sprite b = sprites.get(j);
+					//collision code here
 				}
-				else{
-					doGravity(a);
-					Iterator<Sprite> jter = sprites.iterator();
+				a.move(TIME_SCALE * TIME_STEP, PIXEL_SCALE);
+			}
+			else{
+				disp.deleteObserver(a);
+				System.out.println("ded");
+				
+			}
+		}
+//			Iterator<Sprite> iter = sprites.iterator();
+//			while(iter.hasNext()){
+//				Sprite a = iter.next();
+//				if(!inBounds(a.pos())){
+//					disp.deleteObserver(a);
+//					iter.remove();
+//					System.out.println("ded");
+//				}
+//				else{
+//					doGravity(a);
+//					Iterator<Sprite> jter = sprites.iterator();
 //					while(jter.hasNext()){
 //						Sprite b = jter.next();
 //						Vec n = null;
@@ -115,13 +130,14 @@ public class PhysicsMain {
 //							resolveCollision(a, b, n);
 //						}
 //					}
-					a.move(TIME_SCALE * TIME_STEP, PIXEL_SCALE);
-				}
-			}
+//					a.move(TIME_SCALE * TIME_STEP, PIXEL_SCALE);
+//				}
+//			}
+		
 	}
 	
 	// apply gravity
-	private static void doGravity(Sprite s){
+	private static void applyGravity(Sprite s){
 		if(s.invMass() > 0){
 			Vec v = s.vel();
 			v.add(0, GRAVITY * TIME_STEP);
@@ -235,5 +251,4 @@ public class PhysicsMain {
 		}
 		return 0;
 	}
-
 }
