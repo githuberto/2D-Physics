@@ -1,7 +1,7 @@
 package physics;
 
 public enum ColType {
-		AABBvsAABB,
-		CirclevsAABB,
+		BoxvsBox,
+		BoxvsCircle,
 		CirclevsCircle;
 }

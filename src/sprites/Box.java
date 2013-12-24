@@ -9,24 +9,24 @@ import physics.Vec;
 public class Box extends Sprite{
 	double width;
 	double height;
+	Vec max;
+	Vec min;
 	
 	/*** Constructors ***/
 	
 	public Box(double x0, double y0, double width, double height, Color c){
 		pos = new Vec(x0, y0);
-		vel = new Vec(0, 0);
 		this.width = width;
 		this.height = height;
-		restitution = .5;
 		color = c;
+		initBox();
 	}
-	public Box(int x0, int y0, int width, int height, Color c){
-		pos = new Vec(x0, y0);
+	
+	private void initBox(){
 		vel = new Vec(0, 0);
-		this.width = width;
-		this.height = height;
-		restitution = .50;
-		color = c;
+		restitution = 0.5;
+		max = new Vec(pos.x() + width / 2, pos.y() + height / 2);
+		min = new Vec(pos.x() - width / 2, pos.y() - height / 2);
 	}
 	
 	/*** Accessors ***/
@@ -39,14 +39,12 @@ public class Box extends Sprite{
 		return height;
 	}
 	
-	// return top left corner, bottom left numerically
-	public Vec tlCorner(){
-		return new Vec(pos.x() - width/2, pos.y() - height/2);
+	public Vec max(){
+		return max;
 	}
 	
-	// return bottom right corner, top right numerically
-	public Vec brCorner(){
-		return new Vec(pos.x() + width/2, pos.y() + height/2);
+	public Vec min(){
+		return min;
 	}
 	
 	/*** Simulation ***/

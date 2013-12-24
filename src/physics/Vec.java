@@ -4,7 +4,8 @@ public class Vec {
 	double x;
 	double y;
 	
-	// constructors
+	/*** Constructors ***/
+	
 	public Vec(double x0, double y0){
 		x = x0;
 		y = y0;
@@ -15,7 +16,8 @@ public class Vec {
 		y = v.y;
 	}
 	
-	// accessors
+	/*** Accessors ***/
+	
 	public double x(){
 		return x;
 	}
@@ -23,13 +25,9 @@ public class Vec {
 	public double y(){
 		return y;
 	}
-	
-	public void set(double x0, double y0){
-		x = x0;
-		y = y0;
-	}
 		
-	// math
+	/*** Math ***/
+	
 	public Vec times(Double d){
 		return new Vec(x*d, y*d);
 	}
@@ -58,7 +56,8 @@ public class Vec {
 		return times(1 / magnitude());
 	}
 	
-	// operations
+	/*** Operations ***/
+	
 	public void add(Vec v){
 		x += v.x;
 		y += v.y;
@@ -79,7 +78,18 @@ public class Vec {
 		y -= v.y;
 	}
 	
-	// misc
+	public void set(Vec v){
+		x = v.x;
+		y = v.y;
+	}
+	
+	public void set(double x0, double y0){
+		x = x0;
+		y = y0;
+	}
+	
+	/*** Misc ***/
+	
 	public String toString(){
 		return "[" + (int)(0.5+x) + ", " + (int)(0.5+y) + "]";
 	}	

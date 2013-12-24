@@ -5,9 +5,14 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+
 import javax.swing.Timer;
 
 
+
+
+
+import physics.Collision;
 import physics.Vec;
 import sprites.*;
 
@@ -89,7 +94,7 @@ public class PhysicsMain {
 		int timeSlice = (int)(t * 1000);
 		ActionListener refreshGraphics = new ActionListener(){
 			public void actionPerformed(ActionEvent evt){
-				countTicks();
+//				countTicks();
 				callRepaint();
 				addSprites();
 				doPhysics();
@@ -119,7 +124,13 @@ public class PhysicsMain {
 				a.move(TIME_STEP, PIXEL_SCALE);
 				for(int j = i - 1; j >= 0; j--){
 					Sprite b = sprites.get(j);
-					//collision code here
+					Wrapper wrap = new Wrapper(a, b);
+					Vec n = new Vec(0, 0);
+					checkCollision(wrap);
+					if(wrap.penetration > 0){
+						resolveCollision(wrap);
+						correctPosition(wrap);
+					}
 				}
 			}
 			else{
@@ -137,60 +148,71 @@ public class PhysicsMain {
 			v.add(0, GRAVITY * TIME_STEP * TIME_SCALE);
 		}
 	}
-
-	/*** Collision ***/
 	
-	private static boolean objectsCollided(Sprite a, Sprite b, Vec n){
-		if(a == b){
-			return false;
+	/*** Collision Checks ***/
+	
+	public static void checkCollision(Wrapper w){
+		if(w.a instanceof Box && w.b instanceof Box){
+			boxVsBox(w);
 		}
-		if(a instanceof Box && b instanceof Box){
-			return AABBvsAABB((Box) a, (Box) b, n);
-		}
-		if(a instanceof Circle && b instanceof Circle){
-			n = b.pos().minus(a.pos()).toNormal();
-			return circleVSCircle((Circle) a, (Circle) b);
-		}
-		return false;
 	}
-	// check collision for two boxes 
-	private static boolean AABBvsAABB(Box a, Box b, Vec n){
-		Vec minA = a.tlCorner();
-		Vec minB = b.tlCorner();
-		Vec maxA= a.brCorner();
-		Vec maxB = b.brCorner();
-
-		if(maxA.x() < minB.x()){
-			n = new Vec(-1, 0);
-			return false;
-		}
-		if(maxA.x() < minB.x()){
-			n = new Vec(1, 0);
-			return false;
-		}
-		if(maxA.y() < minB.y()){
+	
+	public static void boxVsBox(Wrapper w){
+		Vec n = w.n;
+		Box a = (Box) w.a;
+		Box b = (Box) w.b;
+		
+		n.set(b.pos().minus(a.pos()));
+		
+		// calculate half x extents
+		double aExtent = (a.max().x() - a.min().x()) / 2;
+		double bExtent = (b.max().x() - b.min().x()) / 2;
+		
+		// calculate x-axis penetration
+		double xPen = aExtent + bExtent - Math.abs(n.x());
+		
+		if(xPen > 0){
+			// calculate half y extents
+			aExtent = (a.max().y() - a.min().y()) / 2;
+			bExtent = (b.max().y() - b.min().y()) / 2;
 			
-			n = new Vec(0, -1);
-			return false;
+			// calculate y-axis penetration
+			double yPen = aExtent + bExtent - Math.abs(n.y());
+			
+			if(yPen > 0){
+				// find the axis of least penetration
+				if (xPen < yPen){
+					if(n.x() > 0)
+						n.set(1, 0);
+					else
+						n.set(-1, 0);
+					w.penetration = xPen;
+				}
+				else{
+					if(n.y() > 0)
+						n.set(0, 1);
+					else
+						n.set(0, -1);
+					w.penetration = yPen;
+				}
+			}
 		}
-		if(minA.y() > maxB.y()){
-			n = new Vec(0, 1);
-			return false;
-		}
-//		System.out.println(a + " collided with " + b);
-		return true;
 	}
-	// check collision for two circles
-	private static boolean circleVSCircle(Circle a, Circle b){
-		double r = a.r() + b.r();
-		r *= r;
-		double dX = b.x() - a.x();
-		double dY = b.y() - a.y();
-		return r > dX*dX + dY*dY;
+
+	/*** Collision Resolution ***/
+	
+	private static void resolveCollision(Wrapper w){
+		if(w.a instanceof Box && w.b instanceof Box)
+			resolveBoxvsBox(w);
 	}
-	// resolve the collision
-	private static void resolveCollision(Sprite a, Sprite b, Vec n){
-		System.out.println("resolving...");
+	
+	private static void resolveBoxvsBox(Wrapper w){
+		Box a = (Box) w.a;
+		Box b = (Box) w.b;
+		Vec n = w.n;
+		
+		
+		System.out.println("resolving: " + a + ", " + b);
 		// calculate relative velocty
 		Vec relVel = b.vel().minus(a.vel());
 		System.out.println("relative velocity: " + relVel);
@@ -216,6 +238,20 @@ public class PhysicsMain {
 		}
 	}
 	
+	// correct the position error created by floating points
+	private static void correctPosition(Wrapper w){
+		Sprite a = w.a;
+		Sprite b = w.b;
+		
+		double percent = 0.2;
+		double slop = 0.01;
+		double multiplier = Math.max(w.penetration - slop, 0.0) / (a.invMass() + b.invMass()) * percent;
+		Vec correction = w.n.times(multiplier);
+		
+		a.pos().sub(correction.times(a.invMass()));
+		b.pos().add(correction.times(b.invMass()));
+	}
+	
 	/*** Utilities ***/
 	
 	// check if the vector is inside the window
@@ -236,5 +272,6 @@ public class PhysicsMain {
 		}
 		spriteQueue.clear();
 	}
-	
 }
+
+
