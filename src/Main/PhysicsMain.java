@@ -36,7 +36,6 @@ public class PhysicsMain {
 	public static ArrayList<Sprite> spriteQueue = new ArrayList<Sprite>();
 	public static Dispatcher disp;
 	public static PhysicsWindow frame;
-	public static final PhysicsWindow[] FRAME_REF = new PhysicsWindow[1]; // holds frame reference for anonymous classes
 	
 	public static long last = System.currentTimeMillis();
 	
@@ -46,8 +45,8 @@ public class PhysicsMain {
 	public static void main(String[] args){
 		// make sprites
 		sprites = new ArrayList<Sprite>();
-//		makeCircles(sprites);
-		makeBoxes(sprites);
+		makeCircles(sprites);
+//		makeBoxes(sprites);
 		
 		// add all sprites to dispatcher
 		disp = new Dispatcher();
@@ -56,29 +55,21 @@ public class PhysicsMain {
 		
 		// make frame
 		frame = makeFrame();
-		FRAME_REF[0] = frame;
 		
 		// make timer
 		Timer drawTimer = makeTimer(TIME_STEP, TIME_SCALE);
-		System.out.println(drawTimer.getDelay());
 		// start simualtion
 		drawTimer.start();
 	}
 	
 	public static void makeCircles(ArrayList<Sprite> sprites){
 		sprites.add(new Circle(300, 400, 100, Color.MAGENTA));
-		sprites.get(0).setVel(-20, 0);
-		sprites.get(0).setMass(500);
-		sprites.add(new Circle(700, 400, 30, Color.ORANGE));
-		sprites.get(1).setVel(-80, 0);
+		sprites.get(0).setMass(0);
 	}
 	
 	public static void makeBoxes(ArrayList<Sprite> sprites){
 		sprites.add(new Box(WIDTH / 2, HEIGHT - 1, WIDTH, 100, Color.BLACK));
 		sprites.get(0).setMass(0);
-//		sprites.add(new Box(100, 100, 120, 120, Color.RED));
-//		sprites.add(new Box(230, 100, 100, 100, Color.BLUE));
-//		sprites.get(sprites.size() - 1).setVel(-500, 15);
 		sprites.add(new Box(400, 340, 70, 200, Color.GREEN));
 	}
 	
@@ -127,7 +118,7 @@ public class PhysicsMain {
 					Manifold manifold = new Manifold(a, b);
 					Vec n = new Vec(0, 0);
 					checkCollision(manifold);
-					if(manifold.penetration > 0){
+					if(checkCollision(manifold)){
 						resolveCollision(manifold);
 						correctPosition(manifold);
 					}
@@ -151,13 +142,16 @@ public class PhysicsMain {
 	
 	/*** Collision Checks ***/
 	
-	public static void checkCollision(Manifold m){
+	public static boolean checkCollision(Manifold m){
 		if(m.a instanceof Box && m.b instanceof Box){
-			checkBoxVsBox(m);
+			return checkBoxVsBox(m);
 		}
+		if(m.a instanceof Circle && m.b instanceof Circle)
+			return checkCircleVsCircle(m);
+		return false;
 	}
 	
-	public static void checkBoxVsBox(Manifold m){
+	public static boolean checkBoxVsBox(Manifold m){
 		Vec n = m.n;
 		Box a = (Box) m.a;
 		Box b = (Box) m.b;
@@ -195,31 +189,101 @@ public class PhysicsMain {
 						n.set(0, -1);
 					m.penetration = yPen;
 				}
+				return true;
 			}
 		}
+		return false;
+	}
+	
+	public static boolean checkCircleVsCircle(Manifold m){
+		Vec n = m.n;
+		Circle a = (Circle) m.a;
+		Circle b = (Circle) m.b;
+		
+		Vec disp = b.pos().minus(a.pos());
+		double radius = a.r() + b.r();
+		double mag2 = disp.magSquared();	// square of the displacement magnitude
+		
+		if(radius*radius > mag2){
+			n.set(disp.toNormal());
+			m.penetration = radius - disp.magnitude();
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean checkBoxVsCircle(Manifold m){
+		Vec n = m.n;
+		Box a;
+		Circle b;
+		if(m.a instanceof Box){
+			a = (Box) m.a;
+			b = (Circle) m.b;
+		}
+		else{
+			a = (Box) m.b;
+			b = (Circle) m.a;
+		}
+		
+		Vec closest = b.pos().minus(a.pos());
+		
+		double xExtent = (a.max().x() - a.min().x()) / 2;
+		double yExtent = (a.max().y() - a.min().y()) / 2;
+		
+		double xPos = clamp(closest.x(), -xExtent, xExtent);
+		double yPos = clamp(closest.y(), -yExtent, yExtent);
+		closest.set(xPos, yPos);
+		
+		boolean inside = false;
+		
+		if(closest.equals(n)){
+			inside = true;
+			
+			if(Math.abs(n.x()) > Math.abs(n.y())){
+				if(closest.x() > 0)
+					closest.setX(xExtent);
+				else
+					closest.setX(-xExtent);
+			}
+			else{
+				if(closest.y() > 0)
+					closest.setY(yExtent);
+				else
+					closest.setY(-yExtent);
+			}
+		}
+		
+		Vec normal = n.minus(closest);
+		double d = normal.magSquared();
+		double radius = b.r();
+		if(d > radius*radius && !inside)
+			return false;
+		
+		d = Math.sqrt(d);
+		
+		if(inside){
+			m.n.set(n.times(-1.0));
+			m.penetration = radius + d;
+		}
+		else{
+			m.n.set(n);
+			m.penetration = radius + d;
+		}
+		
+		return true;
 	}
 
 	/*** Collision Resolution ***/
 	
 	private static void resolveCollision(Manifold m){
-		if(m.a instanceof Box && m.b instanceof Box)
-			resolveBoxvsBox(m);
-	}
-	
-	private static void resolveBoxvsBox(Manifold m){
-		Box a = (Box) m.a;
-		Box b = (Box) m.b;
+		Sprite a = m.a;
+		Sprite b = m.b;
 		Vec n = m.n;
-		
-		
-		System.out.println("resolving: " + a + ", " + b);
 		// calculate relative velocty
 		Vec relVel = b.vel().minus(a.vel());
-		System.out.println("relative velocity: " + relVel);
 		
 		// calculate scalar projection of velocity relative to the normal
 		double velNorm = relVel.dot(n);
-		System.out.println("normal component of velocity" + velNorm);
 		
 		if(velNorm < 0){
 			// set the restitution to the minimum of the two sprites
@@ -230,11 +294,8 @@ public class PhysicsMain {
 			
 			// apply impulse
 			Vec impulse = n.times(j);
-			System.out.println("impulse: " + impulse);
 			a.vel().sub(impulse.times(a.invMass()));
 			b.vel().add(impulse.times(b.invMass()));
-			System.out.println("a vel: " + a.vel());
-			System.out.println("b vel: " + b.vel());
 		}
 	}
 	
@@ -259,12 +320,22 @@ public class PhysicsMain {
 		return s.inBounds(WIDTH, HEIGHT);
 	}
 	
+	private static double clamp(double val, double min, double max){
+		if(val < min)
+			return min;
+		if(val > max)
+			return max;
+		return val;
+	}
+	
 	public static void makeBox(double x0, double y0){
 		spriteQueue.add(new Box(x0, y0, 100, 100, Color.RED));
 	}
+	
 	public static void makeCircle(double x0, double y0){
 		spriteQueue.add(new Circle(x0, y0, 50, Color.BLUE));
 	}
+	
 	public static void addSprites(){
 		sprites.addAll(spriteQueue);
 		for(Sprite s : spriteQueue){

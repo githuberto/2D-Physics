@@ -48,12 +48,10 @@ public class ContentPane extends JPanel implements MouseListener {
 		// do nothing
 	}
 	public void mouseReleased(MouseEvent e) {
-		System.out.println("click!");
 		if(e.getButton() == MouseEvent.BUTTON1){
 			PhysicsMain.makeBox(e.getX(), e.getY());
 		}
 		if(e.getButton() == MouseEvent.BUTTON3){
-			System.out.println("rightclick");
 			PhysicsMain.makeCircle(e.getX(), e.getY());
 		}
 		// do nothing

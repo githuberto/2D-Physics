@@ -52,6 +52,10 @@ public class Vec {
 		return Math.sqrt(x*x + y*y);
 	}
 	
+	public double magSquared(){
+		return x*x + y*y;
+	}
+	
 	public Vec toNormal(){
 		return times(1 / magnitude());
 	}
@@ -88,9 +92,21 @@ public class Vec {
 		y = y0;
 	}
 	
+	public void setX(double x0){
+		x = x0;
+	}
+	
+	public void setY(double y0){
+		y = y0;
+	}
+	
 	/*** Misc ***/
 	
 	public String toString(){
 		return "[" + (int)(0.5+x) + ", " + (int)(0.5+y) + "]";
-	}	
+	}
+	
+	public boolean equals(Vec v){
+		return x == v.x && y == v.y;
+	}
 }
