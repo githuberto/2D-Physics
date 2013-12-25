@@ -124,12 +124,12 @@ public class PhysicsMain {
 				a.move(TIME_STEP, PIXEL_SCALE);
 				for(int j = i - 1; j >= 0; j--){
 					Sprite b = sprites.get(j);
-					Wrapper wrap = new Wrapper(a, b);
+					Manifold manifold = new Manifold(a, b);
 					Vec n = new Vec(0, 0);
-					checkCollision(wrap);
-					if(wrap.penetration > 0){
-						resolveCollision(wrap);
-						correctPosition(wrap);
+					checkCollision(manifold);
+					if(manifold.penetration > 0){
+						resolveCollision(manifold);
+						correctPosition(manifold);
 					}
 				}
 			}
@@ -151,16 +151,16 @@ public class PhysicsMain {
 	
 	/*** Collision Checks ***/
 	
-	public static void checkCollision(Wrapper w){
-		if(w.a instanceof Box && w.b instanceof Box){
-			boxVsBox(w);
+	public static void checkCollision(Manifold m){
+		if(m.a instanceof Box && m.b instanceof Box){
+			checkBoxVsBox(m);
 		}
 	}
 	
-	public static void boxVsBox(Wrapper w){
-		Vec n = w.n;
-		Box a = (Box) w.a;
-		Box b = (Box) w.b;
+	public static void checkBoxVsBox(Manifold m){
+		Vec n = m.n;
+		Box a = (Box) m.a;
+		Box b = (Box) m.b;
 		
 		n.set(b.pos().minus(a.pos()));
 		
@@ -186,14 +186,14 @@ public class PhysicsMain {
 						n.set(1, 0);
 					else
 						n.set(-1, 0);
-					w.penetration = xPen;
+					m.penetration = xPen;
 				}
 				else{
 					if(n.y() > 0)
 						n.set(0, 1);
 					else
 						n.set(0, -1);
-					w.penetration = yPen;
+					m.penetration = yPen;
 				}
 			}
 		}
@@ -201,15 +201,15 @@ public class PhysicsMain {
 
 	/*** Collision Resolution ***/
 	
-	private static void resolveCollision(Wrapper w){
-		if(w.a instanceof Box && w.b instanceof Box)
-			resolveBoxvsBox(w);
+	private static void resolveCollision(Manifold m){
+		if(m.a instanceof Box && m.b instanceof Box)
+			resolveBoxvsBox(m);
 	}
 	
-	private static void resolveBoxvsBox(Wrapper w){
-		Box a = (Box) w.a;
-		Box b = (Box) w.b;
-		Vec n = w.n;
+	private static void resolveBoxvsBox(Manifold m){
+		Box a = (Box) m.a;
+		Box b = (Box) m.b;
+		Vec n = m.n;
 		
 		
 		System.out.println("resolving: " + a + ", " + b);
@@ -239,14 +239,14 @@ public class PhysicsMain {
 	}
 	
 	// correct the position error created by floating points
-	private static void correctPosition(Wrapper w){
-		Sprite a = w.a;
-		Sprite b = w.b;
+	private static void correctPosition(Manifold m){
+		Sprite a = m.a;
+		Sprite b = m.b;
 		
 		double percent = 0.2;
 		double slop = 0.01;
-		double multiplier = Math.max(w.penetration - slop, 0.0) / (a.invMass() + b.invMass()) * percent;
-		Vec correction = w.n.times(multiplier);
+		double multiplier = Math.max(m.penetration - slop, 0.0) / (a.invMass() + b.invMass()) * percent;
+		Vec correction = m.n.times(multiplier);
 		
 		a.pos().sub(correction.times(a.invMass()));
 		b.pos().add(correction.times(b.invMass()));

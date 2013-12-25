@@ -3,15 +3,15 @@ package Main;
 import physics.Vec;
 import sprites.Sprite;
 
-/*** a wrapper class for collision objects ***/
+/*** a container for collision objects ***/
 
-class Wrapper{
+class Manifold{
 	public Sprite a;
 	public Sprite b;
 	public Vec n;
 	public double penetration;
 
-	public Wrapper(Sprite a, Sprite b){
+	public Manifold(Sprite a, Sprite b){
 		this.a = a;
 		this.b = b;
 		n = new Vec(0, 0);
