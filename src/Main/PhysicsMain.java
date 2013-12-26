@@ -148,6 +148,8 @@ public class PhysicsMain {
 		}
 		if(m.a instanceof Circle && m.b instanceof Circle)
 			return checkCircleVsCircle(m);
+		if((m.a instanceof Box && m.b instanceof Circle)||(m.a instanceof Circle && m.b instanceof Box))
+			return checkBoxVsCircle(m);
 		return false;
 	}
 	
@@ -212,10 +214,11 @@ public class PhysicsMain {
 		return false;
 	}
 	
-	public static boolean checkBoxVsCircle(Manifold m){
+	public static boolean checkBoxVsCircle2(Manifold m){
 		Vec n = m.n;
 		Box a;
 		Circle b;
+		
 		if(m.a instanceof Box){
 			a = (Box) m.a;
 			b = (Circle) m.b;
@@ -225,7 +228,26 @@ public class PhysicsMain {
 			b = (Circle) m.a;
 		}
 		
-		Vec closest = b.pos().minus(a.pos());
+		
+		return false;
+	}
+	
+	public static boolean checkBoxVsCircle(Manifold m){
+		Vec n = m.n;
+		Box a;
+		Circle b;
+		
+		if(m.a instanceof Box){
+			a = (Box) m.a;
+			b = (Circle) m.b;
+		}
+		else{
+			a = (Box) m.b;
+			b = (Circle) m.a;
+		}
+		
+		n.set(b.pos().minus(a.pos()));
+		Vec closest = new Vec(n);
 		
 		double xExtent = (a.max().x() - a.min().x()) / 2;
 		double yExtent = (a.max().y() - a.min().y()) / 2;
@@ -237,6 +259,7 @@ public class PhysicsMain {
 		boolean inside = false;
 		
 		if(closest.equals(n)){
+			System.out.println("hi");
 			inside = true;
 			
 			if(Math.abs(n.x()) > Math.abs(n.y())){
@@ -260,14 +283,14 @@ public class PhysicsMain {
 			return false;
 		
 		d = Math.sqrt(d);
+
+		m.penetration = radius + d;
 		
 		if(inside){
-			m.n.set(n.times(-1.0));
-			m.penetration = radius + d;
+			m.n.set(n.times(-1.0).toNormal());
 		}
 		else{
-			m.n.set(n);
-			m.penetration = radius + d;
+			m.n.set(n.toNormal());
 		}
 		
 		return true;
