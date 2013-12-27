@@ -2,6 +2,7 @@ package Main;
 import graphics.*;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import javax.swing.Timer;
 
 
 
-import physics.Collision;
+
 import physics.Vec;
 import sprites.*;
 
@@ -146,10 +147,19 @@ public class PhysicsMain {
 		if(m.a instanceof Box && m.b instanceof Box){
 			return checkBoxVsBox(m);
 		}
-		if(m.a instanceof Circle && m.b instanceof Circle)
+		if(m.a instanceof Circle && m.b instanceof Circle){
 			return checkCircleVsCircle(m);
-		if((m.a instanceof Box && m.b instanceof Circle)||(m.a instanceof Circle && m.b instanceof Box))
+		}
+		if((m.a instanceof Box && m.b instanceof Circle)||(m.a instanceof Circle && m.b instanceof Box)){
+			// always make sure a is a box
+			if(m.a instanceof Circle){
+				Sprite temp = m.a;
+				m.a = m.b;
+				m.b = temp;
+				System.out.println(m.a == m.b);
+			}
 			return checkBoxVsCircle(m);
+		}
 		return false;
 	}
 	
@@ -209,6 +219,8 @@ public class PhysicsMain {
 		if(radius*radius > mag2){
 			n.set(disp.toNormal());
 			m.penetration = radius - disp.magnitude();
+
+			System.out.println(m.n);
 			return true;
 		}
 		return false;
@@ -234,20 +246,11 @@ public class PhysicsMain {
 	
 	public static boolean checkBoxVsCircle(Manifold m){
 		Vec n = m.n;
-		Box a;
-		Circle b;
+		Box a = (Box) m.a;
+		Circle b = (Circle) m.b;
 		
-		if(m.a instanceof Box){
-			a = (Box) m.a;
-			b = (Circle) m.b;
-		}
-		else{
-			a = (Box) m.b;
-			b = (Circle) m.a;
-		}
-		
-		n.set(b.pos().minus(a.pos()));
-		Vec closest = new Vec(n);
+		Vec disp = b.pos().minus(a.pos());
+		Vec closest = new Vec(disp);
 		
 		double xExtent = (a.max().x() - a.min().x()) / 2;
 		double yExtent = (a.max().y() - a.min().y()) / 2;
@@ -258,11 +261,10 @@ public class PhysicsMain {
 		
 		boolean inside = false;
 		
-		if(closest.equals(n)){
-			System.out.println("hi");
+		if(closest.equals(disp)){
 			inside = true;
 			
-			if(Math.abs(n.x()) > Math.abs(n.y())){
+			if(Math.abs(disp.x()) > Math.abs(disp.y())){
 				if(closest.x() > 0)
 					closest.setX(xExtent);
 				else
@@ -276,7 +278,7 @@ public class PhysicsMain {
 			}
 		}
 		
-		Vec normal = n.minus(closest);
+		Vec normal = disp.minus(closest);
 		double d = normal.magSquared();
 		double radius = b.r();
 		if(d > radius*radius && !inside)
@@ -284,13 +286,13 @@ public class PhysicsMain {
 		
 		d = Math.sqrt(d);
 
-		m.penetration = radius + d;
+		m.penetration = radius - d;
 		
 		if(inside){
-			m.n.set(n.times(-1.0).toNormal());
+			m.n.set(disp.toNormal().times(-1.0));
 		}
 		else{
-			m.n.set(n.toNormal());
+			m.n.set(disp.toNormal());
 		}
 		
 		return true;
@@ -324,6 +326,7 @@ public class PhysicsMain {
 	
 	// correct the position error created by floating points
 	private static void correctPosition(Manifold m){
+		
 		Sprite a = m.a;
 		Sprite b = m.b;
 		
@@ -365,6 +368,16 @@ public class PhysicsMain {
 			disp.addObserver(s);
 		}
 		spriteQueue.clear();
+	}
+	
+	public static void drawNormal(Sprite s, Vec v){
+		Graphics g = frame.panel().getGraphics();
+		g.setColor(Color.RED);
+		int x0 = (int) (0.5 + s.pos().x());
+		int y0 = (int) (0.5 + s.pos().y());
+		int x1 = (int) (x0 + v.x());
+		int y1 = (int) (y0 + v.y());
+		g.drawLine(x0, y0, x1, y1);
 	}
 }
 

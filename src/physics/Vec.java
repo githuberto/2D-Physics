@@ -103,7 +103,8 @@ public class Vec {
 	/*** Misc ***/
 	
 	public String toString(){
-		return "[" + (int)(0.5+x) + ", " + (int)(0.5+y) + "]";
+		return "[" + x + ", " + y + "]";
+//		return "[" + (int)(0.5+x) + ", " + (int)(0.5+y) + "]";
 	}
 	
 	public boolean equals(Vec v){
