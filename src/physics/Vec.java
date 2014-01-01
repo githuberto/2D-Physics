@@ -1,6 +1,13 @@
 package physics;
 
 public class Vec {
+	
+	public static void main(String[] args){
+		Vec v = new Vec(0, 12);
+		Vec n = v.toNormal();
+		System.out.println(n);
+	}
+	
 	double x;
 	double y;
 	

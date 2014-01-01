@@ -46,8 +46,8 @@ public class PhysicsMain {
 	public static void main(String[] args){
 		// make sprites
 		sprites = new ArrayList<Sprite>();
-		makeCircles(sprites);
-//		makeBoxes(sprites);
+//		makeCircles(sprites);
+		makeBoxes(sprites);
 		
 		// add all sprites to dispatcher
 		disp = new Dispatcher();
@@ -156,7 +156,6 @@ public class PhysicsMain {
 				Sprite temp = m.a;
 				m.a = m.b;
 				m.b = temp;
-				System.out.println(m.a == m.b);
 			}
 			return checkBoxVsCircle(m);
 		}
@@ -245,7 +244,6 @@ public class PhysicsMain {
 	}
 	
 	public static boolean checkBoxVsCircle(Manifold m){
-		Vec n = m.n;
 		Box a = (Box) m.a;
 		Circle b = (Circle) m.b;
 		
@@ -262,6 +260,7 @@ public class PhysicsMain {
 		boolean inside = false;
 		
 		if(closest.equals(disp)){
+			System.out.println("hi");
 			inside = true;
 			
 			if(Math.abs(disp.x()) > Math.abs(disp.y())){
@@ -286,14 +285,17 @@ public class PhysicsMain {
 		
 		d = Math.sqrt(d);
 
-		m.penetration = radius - d;
 		
 		if(inside){
-			m.n.set(disp.toNormal().times(-1.0));
+			m.n.set(normal.toNormal().times(-1.0));
+			m.penetration = radius + d;
 		}
 		else{
-			m.n.set(disp.toNormal());
+			m.n.set(normal.toNormal());
+			m.penetration = radius - d;
 		}
+		
+		System.out.println(m.penetration);
 		
 		return true;
 	}
